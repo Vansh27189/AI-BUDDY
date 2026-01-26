@@ -148,7 +148,9 @@ if query:
 
 
         try:
-            res = cached_gemini_call(tuple(History))
+            with st.spinner("Generating report..."):
+                res = cached_gemini_call(tuple(History))
+            
             st.chat_message('ai').markdown(res.content)
             st.session_state.messages.append({"role":"ai","content":res.content})
         except Exception as e:
