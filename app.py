@@ -9,13 +9,16 @@ import streamlit as st
 load_dotenv()
 
 if "prev_mode" not in st.session_state:
-    st.session_state.prev_mode = "chat"
+    st.session_state.prev_mode = "💬 Chat"
 
 
 llm = ChatGoogleGenerativeAI(
-    model = "gemini-2.5-flash",
+    model = "gemini-3-flash",
     temperature = 0.5
 )
+
+def cached_gemini_call(history_tuple):
+    return llm.invoke(list(history_tuple))
 
 mode = st.sidebar.radio(
     "Select Mode (⚠️ changing mode will clear current chat)",
@@ -122,19 +125,36 @@ History =[]
 
 
 if query:
-    st.session_state.messages.append({"role":"user","content":query})
+    
     st.chat_message("user").markdown(query)
 
-    for msg in st.session_state.messages:
-        if msg["role"]=="user":
-            History.append(HumanMessage(content=msg["content"]))
-        else:
-            History.append(AIMessage(content=msg["content"]))
+   
 
     if mode == "💬 Chat":
-        res = llm.invoke(History)
-        st.chat_message('ai').markdown(res.content)
-        st.session_state.messages.append({"role":"ai","content":res.content})
+
+        st.session_state.messages.append({"role":"user","content":query})
+
+        for msg in st.session_state.messages:
+            
+            if msg["role"]=="user":
+                History.append(HumanMessage(content=msg["content"]))
+            else:
+                History.append(AIMessage(content=msg["content"]))
+
+
+            if not History:
+                st.warning("Please type a message.")
+                st.stop()
+
+
+        try:
+            res = cached_gemini_call(tuple(History))
+            st.chat_message('ai').markdown(res.content)
+            st.session_state.messages.append({"role":"ai","content":res.content})
+        except Exception as e:
+            st.error("⚠️ Something went wrong while calling the AI.")
+            st.stop()
+
     elif mode == "📄 Report Generator":
         with st.spinner("Generating report..."):
             report, points = generate_report_and_points(query)
