@@ -148,7 +148,7 @@ if query:
 
 
         try:
-            with st.spinner("Generating report..."):
+            with st.spinner("Generating response... "):
                 res = cached_gemini_call(tuple(History))
             
             st.chat_message('ai').markdown(res.content)
