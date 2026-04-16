@@ -148,9 +148,9 @@ if query:
 
         try:
             with st.chat_message("ai"):
-        def stream_response():
-            for chunk in llm.stream(History):
-                yield chunk.content
+                def stream_response():
+                    for chunk in llm.stream(History):
+                        yield chunk.content
 
         full_response = st.write_stream(stream_response())
 
