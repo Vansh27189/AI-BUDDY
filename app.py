@@ -154,7 +154,7 @@ if query:
                         
                 full_response = st.write_stream(stream_response())
 
-    st.session_state.messages.append({"role": "ai", "content": full_response})
+            st.session_state.messages.append({"role": "ai", "content": full_response})
 except Exception as e:
     st.error("⚠️ Something went wrong while calling the AI.")
     st.stop()
