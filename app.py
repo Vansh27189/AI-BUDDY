@@ -151,8 +151,8 @@ if query:
                 def stream_response():
                     for chunk in llm.stream(History):
                         yield chunk.content
-
-        full_response = st.write_stream(stream_response())
+                        
+                full_response = st.write_stream(stream_response())
 
     st.session_state.messages.append({"role": "ai", "content": full_response})
 except Exception as e:
