@@ -146,22 +146,20 @@ if query:
                 st.stop()
 
 
-        try:
+    try:
+        if mode == "💬 Chat":
             with st.chat_message("ai"):
                 def stream_response():
                     for chunk in llm.stream(History):
                         yield chunk.content
-                        
+
                 full_response = st.write_stream(stream_response())
 
             st.session_state.messages.append({"role": "ai", "content": full_response})
-except Exception as e:
-    st.error("⚠️ Something went wrong while calling the AI.")
-    st.stop()
 
-    elif mode == "📄 Report Generator":
-        with st.spinner("Generating report..."):
-            report, points = generate_report_and_points(query)
+        elif mode == "📄 Report Generator":
+            with st.spinner("Generating report..."):
+                report, points = generate_report_and_points(query)
 
         report_output = f"""
     ### 📘 Report
