@@ -17,8 +17,7 @@ llm = ChatGoogleGenerativeAI(
     temperature = 0.5
 )
 
-def cached_gemini_call(history_tuple):
-    return llm.invoke(list(history_tuple))
+
 
 mode = st.sidebar.radio(
     "Select Mode (⚠️ changing mode will clear current chat)",
@@ -148,14 +147,17 @@ if query:
 
 
         try:
-            with st.spinner("Generating response... "):
-                res = cached_gemini_call(tuple(History))
-            
-            st.chat_message('ai').markdown(res.content)
-            st.session_state.messages.append({"role":"ai","content":res.content})
-        except Exception as e:
-            st.error("⚠️ Something went wrong while calling the AI.")
-            st.stop()
+            with st.chat_message("ai"):
+        def stream_response():
+            for chunk in llm.stream(History):
+                yield chunk.content
+
+        full_response = st.write_stream(stream_response())
+
+    st.session_state.messages.append({"role": "ai", "content": full_response})
+except Exception as e:
+    st.error("⚠️ Something went wrong while calling the AI.")
+    st.stop()
 
     elif mode == "📄 Report Generator":
         with st.spinner("Generating report..."):
