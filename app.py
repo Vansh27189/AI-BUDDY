@@ -10,7 +10,7 @@ if "prev_mode" not in st.session_state:
     st.session_state.prev_mode = "💬 Chat"
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-3-flash-preview",
+    model="gemini-3.1-flash-live-preview",
     temperature=0.5
 )
 
