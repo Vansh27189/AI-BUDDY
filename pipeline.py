@@ -12,8 +12,9 @@ load_dotenv()
 
 
 gemini_llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    temperature=0.5
+    model="gemini-3.1-flash-lite-preview",
+    temperature=0.5,
+    model_kwargs={"response_mime_type": "text/plain"}
 )
 
 gemini_template = PromptTemplate(
@@ -27,6 +28,8 @@ Requirements:
 - Keep the tone professional and informative
 - Avoid bullet points unless absolutely necessary
 - Length: 300-400 words
+
+IMPORTANT: Return the report as plain conversational text. Do not use JSON formatting.
 ''',
 input_variables=['topic']
 )
@@ -53,7 +56,7 @@ Format exactly like this:
 - Point 3
 - Point 4
 - Point 5
-
+IMPORTANT: Return the report as plain conversational text. Do not use JSON formatting.
 REPORT:
 {report}
 ''',

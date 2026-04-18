@@ -10,8 +10,9 @@ if "prev_mode" not in st.session_state:
     st.session_state.prev_mode = "💬 Chat"
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-pro",
-    temperature=0.5
+    model="gemini-3.1-flash-lite-preview",
+    temperature=0.5,
+    model_kwargs={"response_mime_type": "text/plain"}
 )
 
 mode = st.sidebar.radio(
@@ -91,24 +92,36 @@ if query:
     if mode == "💬 Chat":
         st.session_state.messages.append({"role": "user", "content": query})
 
+        # Build message history for LangChain
         for msg in st.session_state.messages:
             if msg["role"] == "user":
                 History.append(HumanMessage(content=msg["content"]))
             else:
                 History.append(AIMessage(content=msg["content"]))
 
+        # 1. Define the generator function properly
         def stream_response():
             for chunk in llm.stream(History):
-                yield chunk.content
+                # Check if content is a list (Gemini 3.1 multi-part format)
+                if isinstance(chunk.content, list):
+                    for part in chunk.content:
+                        if isinstance(part, dict) and "text" in part:
+                            yield part["text"]
+                        elif isinstance(part, str):
+                            yield part
+                # Check if content is just a standard string
+                elif isinstance(chunk.content, str):
+                    yield chunk.content
 
+        # 2. Call the generator (Outside the function definition)
         try:
             with st.chat_message("ai"):
-                full_response = st.write_stream(stream_response())
+                full_response = st.write_stream(stream_response) # Pass the function, don't call it here
 
             st.session_state.messages.append({"role": "ai", "content": full_response})
 
         except Exception as e:
-            st.error("⚠️ Something went wrong while calling the AI.")
+            st.error(f"⚠️ Something went wrong: {e}")
             st.stop()
 
     elif mode == "📄 Report Generator":
